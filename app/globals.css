@@ -1,0 +1,25 @@
+/*
+  Add this block to the :root selector in your existing app/globals.css
+  (it's the file create-next-app generates alongside the Tailwind directives).
+  These variables drive the warm "ledger" palette used by SearchForm,
+  BusinessCard, and the main page.
+*/
+
+:root {
+  --paper: #faf7f2;
+  --paper-card: #f3eee4;
+  --ink: #20251f;
+  --ink-soft: #6b7268;
+  --line: #dedacb;
+  --found: #2d6a4f;
+  --found-bg: #e3efe9;
+  --pending: #b8860b;
+  --pending-bg: #fbf3dd;
+  --error: #b5483d;
+  --error-bg: #f8e9e6;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
