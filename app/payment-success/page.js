@@ -26,9 +26,11 @@ function PaymentSuccessInner() {
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
-          setStatus('success')
-          setTimeout(() => router.push('/'), 3000)
-        } else {
+  setStatus('success')
+  setTimeout(() => {
+    window.location.href = '/'
+  }, 2000)
+} else {
           setStatus('error')
         }
       })
