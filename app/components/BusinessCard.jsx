@@ -158,6 +158,22 @@ export default function BusinessCard({ business, userId }) {
                 <div>
                   {c.name && <p className="text-sm font-medium text-[var(--ink)]">{c.name}</p>}
                   <p className="font-mono text-sm text-[var(--found)]">{c.email}</p>
+                  {/* Gmail button */}
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(c.email)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '5px',
+                      marginTop: '6px', padding: '5px 10px',
+                      backgroundColor: '#fff', border: '1px solid #e0e0e0',
+                      borderRadius: '6px', fontSize: '11px', color: '#444',
+                      textDecoration: 'none', fontWeight: '500',
+                    }}
+                  >
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gmail_2020q4_32dp.png" width="14" height="14" alt="" />
+                    Open in Gmail
+                  </a>
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider border border-[var(--found)] text-[var(--found)] rounded-full px-2 py-0.5">
