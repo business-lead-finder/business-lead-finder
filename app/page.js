@@ -17,7 +17,7 @@ export default function Home() {
   const [history, setHistory] = useState([])
   const [accessChecked, setAccessChecked] = useState(false)
   const [hasAccess, setHasAccess] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [view, setView] = useState('search') // search | saved
 
   useEffect(() => {
