@@ -13,35 +13,16 @@ export default function BusinessList({ businesses, userId }) {
 
   return (
     <div style={{ marginTop: '24px' }}>
-      {/* Toggle buttons */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
         <button
           onClick={() => setView('list')}
-          style={{
-            padding: '7px 16px',
-            borderRadius: '8px',
-            border: '1px solid #e0e0e0',
-            backgroundColor: view === 'list' ? '#5046e5' : '#fff',
-            color: view === 'list' ? '#fff' : '#555',
-            fontSize: '13px',
-            fontWeight: '500',
-            cursor: 'pointer',
-          }}
+          style={{ padding: '7px 16px', borderRadius: '8px', border: '1px solid #e0e0e0', backgroundColor: view === 'list' ? '#5046e5' : '#fff', color: view === 'list' ? '#fff' : '#555', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}
         >
           ☰ List
         </button>
         <button
           onClick={() => setView('map')}
-          style={{
-            padding: '7px 16px',
-            borderRadius: '8px',
-            border: '1px solid #e0e0e0',
-            backgroundColor: view === 'map' ? '#5046e5' : '#fff',
-            color: view === 'map' ? '#fff' : '#555',
-            fontSize: '13px',
-            fontWeight: '500',
-            cursor: 'pointer',
-          }}
+          style={{ padding: '7px 16px', borderRadius: '8px', border: '1px solid #e0e0e0', backgroundColor: view === 'map' ? '#5046e5' : '#fff', color: view === 'map' ? '#fff' : '#555', fontSize: '13px', fontWeight: '500', cursor: 'pointer' }}
         >
           🗺️ Map
         </button>
@@ -58,7 +39,7 @@ export default function BusinessList({ businesses, userId }) {
         </div>
       )}
 
-      {view === 'map' && <MapView businesses={businesses} />}
+      {view === 'map' && <MapView businesses={businesses} userId={userId} />}
     </div>
   )
 }
