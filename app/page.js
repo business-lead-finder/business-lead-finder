@@ -18,25 +18,15 @@ export default function Home() {
   const [accessChecked, setAccessChecked] = useState(false)
   const [hasAccess, setHasAccess] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [view, setView] = useState('search') // search | saved
+  const [view, setView] = useState('search')
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth')
-      return
-    }
-    if (!loading && user) {
-      checkAccess(user.id)
-    }
+    if (!loading && !user) { router.push('/auth'); return }
+    if (!loading && user) checkAccess(user.id)
   }, [user, loading])
 
   async function checkAccess(userId) {
-    const { data } = await supabase
-      .from('user_access')
-      .select('paid')
-      .eq('user_id', userId)
-      .single()
-
+    const { data } = await supabase.from('user_access').select('paid').eq('user_id', userId).single()
     if (data?.paid === true) {
       setHasAccess(true)
       setAccessChecked(true)
@@ -54,7 +44,7 @@ export default function Home() {
     } catch {}
   }
 
-  async function handleSearch({ zip, category }) {
+  async function handleSearch({ zip, category, fromHistory = false }) {
     setView('search')
     setSearching(true)
     setError(null)
@@ -62,7 +52,7 @@ export default function Home() {
       const res = await fetch('/api/search-businesses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ zip, category, userId: user.id }),
+        body: JSON.stringify({ zip, category, userId: user.id, fromHistory }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -70,7 +60,7 @@ export default function Home() {
         setBusinesses([])
       } else {
         setBusinesses(data.businesses || [])
-        fetchHistory(user.id)
+        if (!fromHistory) fetchHistory(user.id)
       }
     } catch {
       setError('Network error')
@@ -84,8 +74,6 @@ export default function Home() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
-      
-      {/* Sidebar */}
       <aside style={{
         width: sidebarOpen ? '260px' : '0',
         minWidth: sidebarOpen ? '260px' : '0',
@@ -99,7 +87,6 @@ export default function Home() {
         position: 'sticky',
         top: 0,
       }}>
-        {/* Logo */}
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid #eee' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '32px', height: '32px', backgroundColor: '#5046e5', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>🔍</div>
@@ -107,42 +94,23 @@ export default function Home() {
           </div>
         </div>
 
-        {/* New Search button */}
         <div style={{ padding: '12px' }}>
           <button
             onClick={() => { setView('search'); setBusinesses([]); setSearched(false) }}
-            style={{
-              width: '100%', padding: '10px 14px',
-              backgroundColor: '#5046e5', color: '#fff',
-              border: 'none', borderRadius: '8px',
-              fontSize: '14px', fontWeight: '600',
-              cursor: 'pointer', display: 'flex',
-              alignItems: 'center', gap: '8px',
-            }}
+            style={{ width: '100%', padding: '10px 14px', backgroundColor: '#5046e5', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
           >
             <span style={{ fontSize: '18px' }}>+</span> New Search
           </button>
         </div>
 
-        {/* Nav items */}
         <nav style={{ padding: '4px 12px', flex: 1, overflowY: 'auto' }}>
           <button
             onClick={() => setView('saved')}
-            style={{
-              width: '100%', padding: '10px 12px',
-              backgroundColor: view === 'saved' ? '#f0efff' : 'transparent',
-              color: view === 'saved' ? '#5046e5' : '#444',
-              border: 'none', borderRadius: '8px',
-              fontSize: '14px', fontWeight: '500',
-              cursor: 'pointer', display: 'flex',
-              alignItems: 'center', gap: '10px',
-              textAlign: 'left', marginBottom: '4px',
-            }}
+            style={{ width: '100%', padding: '10px 12px', backgroundColor: view === 'saved' ? '#f0efff' : 'transparent', color: view === 'saved' ? '#5046e5' : '#444', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', textAlign: 'left', marginBottom: '4px' }}
           >
             <span>🔖</span> Saved Leads
           </button>
 
-          {/* Search History */}
           <div style={{ marginTop: '16px' }}>
             <p style={{ fontSize: '11px', fontWeight: '600', color: '#999', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '0 4px 8px' }}>
               Search History
@@ -153,17 +121,8 @@ export default function Home() {
               history.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => handleSearch({ zip: item.location, category: item.category })}
-                  style={{
-                    width: '100%', padding: '8px 12px',
-                    backgroundColor: 'transparent',
-                    color: '#555', border: 'none',
-                    borderRadius: '8px', fontSize: '13px',
-                    cursor: 'pointer', textAlign: 'left',
-                    display: 'block', whiteSpace: 'nowrap',
-                    overflow: 'hidden', textOverflow: 'ellipsis',
-                    marginBottom: '2px',
-                  }}
+                  onClick={() => handleSearch({ zip: item.location, category: item.category, fromHistory: true })}
+                  style={{ width: '100%', padding: '8px 12px', backgroundColor: 'transparent', color: '#555', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', textAlign: 'left', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}
                   onMouseEnter={e => e.target.style.backgroundColor = '#f5f5f5'}
                   onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
                 >
@@ -174,7 +133,6 @@ export default function Home() {
           </div>
         </nav>
 
-        {/* User info + sign out */}
         <div style={{ padding: '12px', borderTop: '1px solid #eee' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px', borderRadius: '8px', marginBottom: '4px' }}>
             <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#5046e5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '13px', fontWeight: '600', flexShrink: 0 }}>
@@ -184,14 +142,7 @@ export default function Home() {
           </div>
           <button
             onClick={signOut}
-            style={{
-              width: '100%', padding: '9px 12px',
-              backgroundColor: 'transparent', color: '#888',
-              border: 'none', borderRadius: '8px',
-              fontSize: '13px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', gap: '8px',
-              textAlign: 'left',
-            }}
+            style={{ width: '100%', padding: '9px 12px', backgroundColor: 'transparent', color: '#888', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', textAlign: 'left' }}
             onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f5f5f5'}
             onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
           >
@@ -200,16 +151,9 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* Main content */}
       <main style={{ flex: 1, backgroundColor: '#f9f9f9', overflowY: 'auto' }}>
-        {/* Top bar */}
         <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #eee', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px', position: 'sticky', top: 0, zIndex: 10 }}>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#555', padding: '4px' }}
-          >
-            ☰
-          </button>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#555', padding: '4px' }}>☰</button>
           <span style={{ fontWeight: '600', fontSize: '15px', color: '#111' }}>
             {view === 'search' ? 'Find Businesses' : 'Saved Leads'}
           </span>
@@ -219,24 +163,14 @@ export default function Home() {
           {view === 'search' && (
             <>
               <SearchForm onSearch={handleSearch} loading={searching} />
-
-              {error && (
-                <div style={{ marginTop: '16px', padding: '12px 16px', backgroundColor: '#fdecea', borderRadius: '8px', color: '#c0392b', fontSize: '14px' }}>
-                  {error}
-                </div>
-              )}
-
+              {error && <div style={{ marginTop: '16px', padding: '12px 16px', backgroundColor: '#fdecea', borderRadius: '8px', color: '#c0392b', fontSize: '14px' }}>{error}</div>}
               {searched && !searching && !error && businesses.length === 0 && (
                 <p style={{ marginTop: '32px', color: '#999', textAlign: 'center' }}>No businesses found for that search.</p>
               )}
-
               <BusinessList businesses={businesses} userId={user?.id} />
             </>
           )}
-
-          {view === 'saved' && (
-            <SavedLeadsView userId={user?.id} />
-          )}
+          {view === 'saved' && <SavedLeadsView userId={user?.id} />}
         </div>
       </main>
     </div>
@@ -249,11 +183,7 @@ function SavedLeadsView({ userId }) {
 
   useEffect(() => {
     async function fetch_leads() {
-      const { data } = await supabase
-        .from('saved_leads')
-        .select('*')
-        .eq('user_id', userId)
-        .order('saved_at', { ascending: false })
+      const { data } = await supabase.from('saved_leads').select('*').eq('user_id', userId).order('saved_at', { ascending: false })
       setLeads(data || [])
       setLoading(false)
     }
@@ -266,7 +196,6 @@ function SavedLeadsView({ userId }) {
   }
 
   if (loading) return <p style={{ color: '#999' }}>Loading saved leads…</p>
-
   if (leads.length === 0) return (
     <div style={{ textAlign: 'center', padding: '60px 0' }}>
       <p style={{ color: '#999', fontSize: '15px' }}>No saved leads yet.</p>
