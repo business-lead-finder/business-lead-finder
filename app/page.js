@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from './context/AuthContext'
 import SearchForm from './components/SearchForm'
@@ -19,6 +19,7 @@ export default function Home() {
   const [hasAccess, setHasAccess] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [view, setView] = useState('search')
+  const [openMenuId, setOpenMenuId] = useState(null)
 
   useEffect(() => {
     if (!loading && !user) { router.push('/auth'); return }
@@ -42,6 +43,12 @@ export default function Home() {
       const data = await res.json()
       if (data.history) setHistory(data.history)
     } catch {}
+  }
+
+  async function deleteHistoryItem(id) {
+    await supabase.from('search_history').delete().eq('id', id)
+    setHistory(history.filter(h => h.id !== id))
+    setOpenMenuId(null)
   }
 
   async function handleSearch({ zip, category, fromHistory = false }) {
@@ -73,7 +80,9 @@ export default function Home() {
   if (loading || !accessChecked || !hasAccess) return null
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+      onClick={() => setOpenMenuId(null)}
+    >
       <aside style={{
         width: sidebarOpen ? '260px' : '0',
         minWidth: sidebarOpen ? '260px' : '0',
@@ -119,15 +128,43 @@ export default function Home() {
               <p style={{ fontSize: '13px', color: '#bbb', padding: '0 4px' }}>No recent searches</p>
             ) : (
               history.map((item) => (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => handleSearch({ zip: item.location, category: item.category, fromHistory: true })}
-                  style={{ width: '100%', padding: '8px 12px', backgroundColor: 'transparent', color: '#555', border: 'none', borderRadius: '8px', fontSize: '13px', cursor: 'pointer', textAlign: 'left', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '2px' }}
-                  onMouseEnter={e => e.target.style.backgroundColor = '#f5f5f5'}
-                  onMouseLeave={e => e.target.style.backgroundColor = 'transparent'}
+                  style={{ position: 'relative', display: 'flex', alignItems: 'center', borderRadius: '8px', marginBottom: '2px' }}
+                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f5f5f5'}
+                  onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  🕐 {item.location} — {item.category}
-                </button>
+                  <button
+                    onClick={() => handleSearch({ zip: item.location, category: item.category, fromHistory: true })}
+                    style={{ flex: 1, padding: '8px 12px', backgroundColor: 'transparent', color: '#555', border: 'none', fontSize: '13px', cursor: 'pointer', textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  >
+                    🕐 {item.location} — {item.category}
+                  </button>
+
+                  {/* 3 dots menu */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === item.id ? null : item.id) }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', color: '#aaa', fontSize: '16px', flexShrink: 0 }}
+                  >
+                    ⋮
+                  </button>
+
+                  {openMenuId === item.id && (
+                    <div
+                      onClick={e => e.stopPropagation()}
+                      style={{ position: 'absolute', right: '8px', top: '32px', backgroundColor: '#fff', border: '1px solid #eee', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, minWidth: '120px' }}
+                    >
+                      <button
+                        onClick={() => deleteHistoryItem(item.id)}
+                        style={{ width: '100%', padding: '10px 14px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', color: '#e74c3c', textAlign: 'left' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fdecea'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))
             )}
           </div>
