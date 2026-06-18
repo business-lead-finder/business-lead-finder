@@ -97,12 +97,7 @@ export default function BusinessCard({ business, userId }) {
           <>
             <dt className="uppercase tracking-wide">Site</dt>
             <dd className="truncate">
-              <a
-                href={business.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-[var(--ink)]"
-              >
+              <a href={business.website} target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--ink)]">
                 {business.website.replace(/^https?:\/\//, '')}
               </a>
             </dd>
@@ -112,17 +107,9 @@ export default function BusinessCard({ business, userId }) {
 
       <div className="mt-1 pt-3 border-t border-[var(--line)]">
         {!business.website && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-  <div style={{
-    width: '16px', height: '16px',
-    border: '2px solid #e0e0e0',
-    borderTop: '2px solid #5046e5',
-    borderRadius: '50%',
-    animation: 'spin 0.8s linear infinite',
-  }} />
-  <p style={{ fontSize: '14px', color: '#888', margin: 0 }}>Crawling web…</p>
-  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-</div>
+          <p className="text-xs text-[var(--ink-soft)] italic">
+            No website on file — can&apos;t crawl for contacts.
+          </p>
         )}
 
         {business.website && status === 'idle' && (
@@ -135,69 +122,70 @@ export default function BusinessCard({ business, userId }) {
         )}
 
         {status === 'loading' && (
-          <p className="text-sm text-[var(--pending)] font-mono animate-pulse">
-            Crawling site…
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '16px', height: '16px', border: '2px solid #e0e0e0', borderTop: '2px solid #5046e5', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <p style={{ fontSize: '14px', color: '#888', margin: 0 }}>Crawling web…</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
         )}
 
         {status === 'error' && (
           <div className="space-y-2">
             <p className="text-sm text-[var(--error)]">{errorMsg}</p>
-            <button onClick={handleFindContact} className="text-xs underline text-[var(--ink-soft)]">
-              Try again
-            </button>
+            <button onClick={handleFindContact} className="text-xs underline text-[var(--ink-soft)]">Try again</button>
           </div>
         )}
 
-        {status === 'done' && contacts.length === 0 && (
-          <p className="text-sm text-[var(--ink-soft)]">
-            No personal contact found
-            {pagesChecked ? ` (checked ${pagesChecked} page${pagesChecked === 1 ? '' : 's'})` : ''}.
-          </p>
-        )}
+        {status === 'done' && (
+          <div>
+            <button
+              onClick={() => { setStatus('idle'); setContacts([]) }}
+              style={{ fontSize: '12px', color: '#888', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', marginBottom: '8px', padding: 0 }}
+            >
+              Hide results
+            </button>
 
-        {status === 'done' && contacts.length > 0 && (
-          <ul className="space-y-2">
-            {contacts.map((c) => (
-              <li
-                key={c.email}
-                className="flex items-start justify-between gap-3 bg-[var(--found-bg)] rounded-md px-3 py-2"
-              >
-                <div>
-                  {c.name && <p className="text-sm font-medium text-[var(--ink)]">{c.name}</p>}
-                  <p className="font-mono text-sm text-[var(--found)]">{c.email}</p>
-                  {/* Gmail button */}
-                  <a
-                    href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(c.email)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '5px',
-                      marginTop: '6px', padding: '5px 10px',
-                      backgroundColor: '#fff', border: '1px solid #e0e0e0',
-                      borderRadius: '6px', fontSize: '11px', color: '#444',
-                      textDecoration: 'none', fontWeight: '500',
-                    }}
-                  >
-                    <img src="https://www.gstatic.com/images/branding/product/1x/gmail_2020q4_32dp.png" width="14" height="14" alt="" />
-                    Open in Gmail
-                  </a>
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider border border-[var(--found)] text-[var(--found)] rounded-full px-2 py-0.5">
-                    {CONFIDENCE_LABEL[c.confidence] || c.confidence}
-                  </span>
-                  <button
-                    onClick={() => handleSaveLead(c.email)}
-                    disabled={saved || saving}
-                    className="text-[10px] font-mono underline text-[var(--ink-soft)] disabled:opacity-40"
-                  >
-                    {saved ? '✓ Saved' : 'Save with email'}
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+            {contacts.length === 0 && (
+              <p className="text-sm text-[var(--ink-soft)]">
+                No personal contact found
+                {pagesChecked ? ` (checked ${pagesChecked} page${pagesChecked === 1 ? '' : 's'})` : ''}.
+              </p>
+            )}
+
+            {contacts.length > 0 && (
+              <ul className="space-y-2">
+                {contacts.map((c) => (
+                  <li key={c.email} className="flex items-start justify-between gap-3 bg-[var(--found-bg)] rounded-md px-3 py-2">
+                    <div>
+                      {c.name && <p className="text-sm font-medium text-[var(--ink)]">{c.name}</p>}
+                      <p className="font-mono text-sm text-[var(--found)]">{c.email}</p>
+                      <a
+                        href={`https://mail.google.com/mail/?view=cm&to=${encodeURIComponent(c.email)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', marginTop: '6px', padding: '5px 10px', backgroundColor: '#fff', border: '1px solid #e0e0e0', borderRadius: '6px', fontSize: '11px', color: '#444', textDecoration: 'none', fontWeight: '500' }}
+                      >
+                        <img src="https://www.gstatic.com/images/branding/product/1x/gmail_2020q4_32dp.png" width="14" height="14" alt="" />
+                        Open in Gmail
+                      </a>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="shrink-0 text-[10px] font-mono uppercase tracking-wider border border-[var(--found)] text-[var(--found)] rounded-full px-2 py-0.5">
+                        {CONFIDENCE_LABEL[c.confidence] || c.confidence}
+                      </span>
+                      <button
+                        onClick={() => handleSaveLead(c.email)}
+                        disabled={saved || saving}
+                        className="text-[10px] font-mono underline text-[var(--ink-soft)] disabled:opacity-40"
+                      >
+                        {saved ? '✓ Saved' : 'Save with email'}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
     </div>
