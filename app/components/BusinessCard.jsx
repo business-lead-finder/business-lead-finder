@@ -112,9 +112,17 @@ export default function BusinessCard({ business, userId }) {
 
       <div className="mt-1 pt-3 border-t border-[var(--line)]">
         {!business.website && (
-          <p className="text-xs text-[var(--ink-soft)] italic">
-            No website on file — can&apos;t crawl for contacts.
-          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+  <div style={{
+    width: '16px', height: '16px',
+    border: '2px solid #e0e0e0',
+    borderTop: '2px solid #5046e5',
+    borderRadius: '50%',
+    animation: 'spin 0.8s linear infinite',
+  }} />
+  <p style={{ fontSize: '14px', color: '#888', margin: 0 }}>Crawling web…</p>
+  <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+</div>
         )}
 
         {business.website && status === 'idle' && (
